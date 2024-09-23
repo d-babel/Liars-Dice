@@ -27,8 +27,7 @@ public class LiarDiceGame {
             initializePlayers();
             playRounds();
             System.out.println();
-            System.out.println("Do you want to play another game? (yes/no)");
-            String response = scanner.nextLine();
+            String response = getValidYesNoResponse("Do you want to play another game? (yes/no)");
             if (!response.equalsIgnoreCase("yes")) {
                 playAgain = false;
             } else {
@@ -55,8 +54,7 @@ public class LiarDiceGame {
         System.out.println("or call \"liar\" to challenge the previous bid;");
         System.out.println("the last player with dice remaining wins.");
         System.out.println();
-        System.out.println("Do you understand the rules? (yes/no)");
-        String response = scanner.nextLine();
+        String response = getValidYesNoResponse("Do you understand the rules? (yes/no)");
         if (!response.equalsIgnoreCase("yes")) {
             System.out.println();
             System.out.println("Please read the rules carefully before playing.");
@@ -75,21 +73,10 @@ public class LiarDiceGame {
 
         System.out.println();
         System.out.println("Choose difficulty level for AI opponents (easy/medium/hard):");
-        String difficulty = scanner.nextLine();
+        String difficulty = getValidDifficulty();
 
         System.out.println();
-        System.out.println("How many AI opponents do you want to play with? (1-5)");
-        int numAI = 0;
-        while (numAI < 1 || numAI > 5) {
-            try {
-                numAI = Integer.parseInt(scanner.nextLine());
-                if (numAI < 1 || numAI > 5) {
-                    System.out.println("Please enter a number between 1 and 5.");
-                }
-            } catch (NumberFormatException e) {
-                System.out.println("Invalid input. Please enter a number between 1 and 5.");
-            }
-        }
+        int numAI = getValidAIPlayerCount();
 
         System.out.println();
         // adding AI opponents
@@ -165,8 +152,7 @@ public class LiarDiceGame {
             System.out.println("No bids have been made yet.");
         }
         System.out.println();
-        System.out.println("Do you want to (1) make a bid or (2) call 'liar'?");
-        String choice = scanner.nextLine();
+        String choice = getValidChoice();
 
         if (choice.equals("1")) {
             makeBid(player);
@@ -178,10 +164,6 @@ public class LiarDiceGame {
             } else {
                 callLiar(player);
             }
-        } else {
-            System.out.println("Invalid choice. Please try again.");
-            System.out.println();
-            humanTurn(player);
         }
     }
 
@@ -198,7 +180,7 @@ public class LiarDiceGame {
                 currentBidQuantity = bidQuantity;
                 currentBidFace = bidFace;
             } else {
-                System.out.println("Invalid bid. Your bid must increase either the quantity or face value.");
+                System.out.println("Invalid bid. Your bid must increase either the quantity or face value within dice parameters.");
                 System.out.println();
                 makeBid(player);
             }
@@ -362,18 +344,77 @@ public class LiarDiceGame {
 
         // check if only one player remains
         if (players.size() == 1) {
-            return false; 
+            return false;
         } else {
             if (currentPlayerIndex >= players.size()) {
                 currentPlayerIndex = 0;
             }
-            return true; 
+            return true;
         }
     }
 
     private void clearConsole() {
         System.out.print("\033[H\033[2J");
         System.out.flush();
+    }
+
+    // gets valid yes or no response
+    private String getValidYesNoResponse(String prompt) {
+        System.out.println(prompt);
+        String response = scanner.nextLine().trim().toLowerCase();
+        while (!response.equals("yes") && !response.equals("no")) {
+            clearConsole();
+            System.out.println("Invalid input. Please answer 'yes' or 'no'.");
+            System.out.println();
+            System.out.println(prompt);
+            response = scanner.nextLine().trim().toLowerCase();
+        }
+        return response;
+    }
+
+    // gets valid difficulty level
+    private String getValidDifficulty() {
+        String difficulty = scanner.nextLine().trim().toLowerCase();
+        while (!difficulty.equals("easy") && !difficulty.equals("medium") && !difficulty.equals("hard")) {
+            clearConsole();
+            System.out.println("Invalid input. Please choose 'easy', 'medium', or 'hard'.");
+            System.out.println();
+            difficulty = scanner.nextLine().trim().toLowerCase();
+        }
+        return difficulty;
+    }
+
+    // gets valid number of AI opponents
+    private int getValidAIPlayerCount() {
+        int numAI = 0;
+        while (numAI < 1 || numAI > 5) {
+            try {
+                System.out.println("How many AI opponents do you want to play with? (1-5)");
+                numAI = Integer.parseInt(scanner.nextLine().trim());
+                if (numAI < 1 || numAI > 5) {
+                    clearConsole();
+                    System.out.println("Invalid number. Please enter a number between 1 and 5.");
+                }
+            } catch (NumberFormatException e) {
+                clearConsole();
+                System.out.println("Invalid input. Please enter a number between 1 and 5.");
+            }
+        }
+        return numAI;
+    }
+
+    // gets valid choice for human action
+    private String getValidChoice() {
+        System.out.println("Do you want to (1) make a bid or (2) call 'liar'?");
+        String choice = scanner.nextLine().trim();
+        while (!choice.equals("1") && !choice.equals("2")) {
+            clearConsole();
+            System.out.println("Invalid choice. Please enter '1' or '2'.");
+            System.out.println();
+            System.out.println("Do you want to (1) make a bid or (2) call 'liar'?");
+            choice = scanner.nextLine().trim();
+        }
+        return choice;
     }
 
     public static void main(String[] args) {
