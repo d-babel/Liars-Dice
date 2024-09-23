@@ -8,3 +8,6 @@
 ### 9/22
   - Optimized clearConsole() as I didn’t understand what it really did from research code found online
   - Still need to add "dummy cases" as well as invalid checks for dice
+
+### 9/22
+  - Added checks for invalid user inputs and dice roll
