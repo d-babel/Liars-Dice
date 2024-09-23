@@ -11,3 +11,6 @@
 
 ### 9/22
   - Added checks for invalid user inputs and dice roll
+
+### 9/23
+  - Added ASCII art in title screen - http://patorjk.com/software/taag/#p=display&h=0&v=0&f=Graffiti&t=Liars%20Dice

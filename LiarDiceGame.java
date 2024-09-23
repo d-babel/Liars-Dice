@@ -45,6 +45,15 @@ public class LiarDiceGame {
     // game rules
     private void showRules() {
         clearConsole();
+        
+        System.out.println(".____     .__                          ________   .__                 ");
+        System.out.println("|    |    |__|_____   _______   ______ \\______ \\  |__|  ____    ____  ");
+        System.out.println("|    |    |  |\\__  \\  \\_  __ \\ /  ___/  |    |  \\ |  |_\\ ___\\ _/ __ \\ ");
+        System.out.println("|    |___ |  | / __ \\_ |  | \\/ \\___ \\   |    `   \\|  |\\  \\___ \\  ___/ ");
+        System.out.println("|_______ \\|__|(____  / |__|   /____  > /_______  /|__| \\___  > \\___  >");
+        System.out.println("        \\/         \\/              \\/          \\/          \\/     \\/ ");      
+        
+        System.out.println();
         System.out.println("Welcome to Liar's Dice!");
         System.out.println();
         System.out.println("Here are the rules:");
