@@ -27,8 +27,8 @@ public class LiarDiceGame {
             initializePlayers();
             playRounds();
             System.out.println();
-            String response = getValidYesNoResponse("Do you want to play another game? (yes/no)");
-            if (!response.equalsIgnoreCase("yes")) {
+            String response = getValidYesNoResponse("Do you want to play another game? (yes/no or y/n)");
+            if (!response.equalsIgnoreCase("yes") && !response.equalsIgnoreCase("y")) {
                 playAgain = false;
             } else {
                 // reset game state
@@ -63,8 +63,8 @@ public class LiarDiceGame {
         System.out.println("or call \"liar\" to challenge the previous bid;");
         System.out.println("the last player with dice remaining wins.");
         System.out.println();
-        String response = getValidYesNoResponse("Do you understand the rules? (yes/no)");
-        if (!response.equalsIgnoreCase("yes")) {
+        String response = getValidYesNoResponse("Do you understand the rules? (yes/no or y/n)");
+        if (!response.equalsIgnoreCase("yes") && !response.equalsIgnoreCase("y")) {
             System.out.println();
             System.out.println("Please read the rules carefully before playing.");
             System.out.println();
@@ -81,7 +81,7 @@ public class LiarDiceGame {
         players.add(humanPlayer);
 
         System.out.println();
-        System.out.println("Choose difficulty level for AI opponents (easy/medium/hard):");
+        System.out.println("Choose difficulty level for AI opponents (easy/medium/hard or e/m/h):");
         String difficulty = getValidDifficulty();
 
         System.out.println();
@@ -203,22 +203,42 @@ public class LiarDiceGame {
     // opponents turn
     private void aiTurn(player player) {
         System.out.println(player.getName() + " is thinking...");
-        // Small delay to simulate thinking
+        // thinking delay
         try {
             Thread.sleep(1000);
         } catch (InterruptedException e) {
-            // Do nothing
+            // do nothing
         }
 
-        // difficulty level
+
         String difficulty = player.getDifficulty();
         boolean willCallLiar = false;
-
-        // decide to call 'liar'
-        if (currentBidQuantity > 0 && Math.random() < 0.2) {
-            willCallLiar = true;
+        
+        int totalDice = 0;
+        for (player p : players) {
+            totalDice += p.getDiceCount();
         }
-
+    
+        // check whether to call liar based on difficulty and probability
+        if (currentBidQuantity > 0) {
+            if (difficulty.equalsIgnoreCase("medium")) {
+                // medium ai calls liar if bid exceeds what its dice can reasonably support
+                int ownCount = countDiceWithFace(player, currentBidFace);
+                if (currentBidQuantity > ownCount + (totalDice / 6) + 1) { 
+                    willCallLiar = true; 
+                }
+            } else if (difficulty.equalsIgnoreCase("hard")) {
+                // hard ai calculates probability based on total dice and current bid
+                int ownCount = countDiceWithFace(player, currentBidFace);
+                double estimatedOpponentDice = (totalDice - player.getDiceCount()) / 6.0;
+                double threshold = ownCount + estimatedOpponentDice;
+                
+                if (currentBidQuantity > threshold) {
+                    willCallLiar = true;
+                }
+            }
+        }
+    
         if (willCallLiar) {
             System.out.println(player.getName() + " calls 'liar'!");
             System.out.println();
@@ -226,12 +246,12 @@ public class LiarDiceGame {
         } else {
             int bidQuantity;
             int bidFace;
-
+    
             if (difficulty.equalsIgnoreCase("easy")) {
                 bidQuantity = currentBidQuantity + 1;
                 bidFace = (int) (Math.random() * 6) + 1;
             } else if (difficulty.equalsIgnoreCase("medium")) {
-                // medium AI considers its own dice
+                // medium ai uses its own dice count more effectively
                 int[] faceCounts = new int[6];
                 for (int dieFace : player.getDice()) {
                     faceCounts[dieFace - 1]++;
@@ -244,24 +264,37 @@ public class LiarDiceGame {
                         maxFace = i + 1;
                     }
                 }
-                bidQuantity = Math.max(currentBidQuantity + 1, maxCount);
+                bidQuantity = Math.max(currentBidQuantity + 1, maxCount + (int) (totalDice / 6.0));
                 bidFace = maxFace;
+    
             } else {
-                // hard AI uses more advanced strategy
-                int totalDice = 0;
-                for (player p : players) {
-                    totalDice += p.getDiceCount();
+                // hard ai calculates bids with even more precision
+                int[] faceCounts = new int[6];
+                for (int dieFace : player.getDice()) {
+                    faceCounts[dieFace - 1]++;
                 }
-                int estimatedFaceCount = totalDice / 6;
-                bidQuantity = Math.max(currentBidQuantity + 1, estimatedFaceCount);
-                bidFace = currentBidFace;
+                int maxCount = 0;
+                int maxFace = 1;
+                for (int i = 0; i < 6; i++) {
+                    if (faceCounts[i] > maxCount) {
+                        maxCount = faceCounts[i];
+                        maxFace = i + 1;
+                    }
+                }
+                
+                // hard ai also takes total dice and probability into account
+                double estimatedTotalCount = (totalDice / 6.0);
+                bidQuantity = Math.max(currentBidQuantity + 1, maxCount + (int) estimatedTotalCount);
+                bidFace = maxFace;
+    
+                // adjust bid if max face exceeds allowed values
                 if (bidFace > 6) {
                     bidFace = 1;
                     bidQuantity++;
                 }
             }
-
-            // ensure the bid is valid
+    
+            // ensures ai bid is valid
             if (!isValidBid(bidQuantity, bidFace)) {
                 bidQuantity = currentBidQuantity;
                 bidFace = currentBidFace + 1;
@@ -270,20 +303,38 @@ public class LiarDiceGame {
                     bidFace = 1;
                 }
             }
-
+    
             System.out.println(player.getName() + " bids " + bidQuantity + " of face " + bidFace);
             currentBidQuantity = bidQuantity;
             currentBidFace = bidFace;
             System.out.println();
         }
     }
-
+    
+    // counts how many dice of the current face a player has
+    private int countDiceWithFace(player player, int face) {
+        int count = 0;
+        for (int dieFace : player.getDice()) {
+            if (dieFace == face) {
+                count++;
+            }
+        }
+        return count;
+    }
+    
     // validates the new bid
     private boolean isValidBid(int bidQuantity, int bidFace) {
+        // get total dice in play to prevent overbidding
+        int totalDice = 0;
+        for (player p : players) {
+            totalDice += p.getDiceCount();
+        }
+    
+        // validate face and quantity
         if (bidFace < 1 || bidFace > 6) {
             return false;
         }
-        if (bidQuantity < 1) {
+        if (bidQuantity < 1 || bidQuantity > totalDice) {
             return false;
         }
         if (currentBidQuantity == 0) {
@@ -298,6 +349,7 @@ public class LiarDiceGame {
         }
     }
 
+    
     // allows a player to call 'liar'
     private void callLiar(player challenger) {
         System.out.println(challenger.getName() + " has called 'liar' on the previous bid!");
@@ -340,10 +392,15 @@ public class LiarDiceGame {
             previousPlayer.removeDie();
         }
 
-        System.out.println("Press Enter to continue...");
-        scanner.nextLine();
+        // prompt to continue or quit
+        System.out.println("Press Enter to continue or 'q' to quit...");
+        String input = scanner.nextLine().trim().toLowerCase();
+        if (input.equals("q")) {
+            System.out.println("Thanks for playing! Exiting game...");
+            System.exit(0); // exits the game if 'q' is pressed
+        }
 
-        currentBidQuantity = -1;
+        currentBidQuantity = -1; // resets bid after liar call
     }
 
     // checks if there is a winner
@@ -367,13 +424,13 @@ public class LiarDiceGame {
         System.out.flush();
     }
 
-    // gets valid yes or no response
+    // gets valid yes or no response, accepts y/n or yes/no
     private String getValidYesNoResponse(String prompt) {
         System.out.println(prompt);
         String response = scanner.nextLine().trim().toLowerCase();
-        while (!response.equals("yes") && !response.equals("no")) {
+        while (!response.equals("yes") && !response.equals("no") && !response.equals("y") && !response.equals("n")) {
             clearConsole();
-            System.out.println("Invalid input. Please answer 'yes' or 'no'.");
+            System.out.println("Invalid input. Please answer 'yes' (y) or 'no' (n).");
             System.out.println();
             System.out.println(prompt);
             response = scanner.nextLine().trim().toLowerCase();
@@ -381,16 +438,24 @@ public class LiarDiceGame {
         return response;
     }
 
-    // gets valid difficulty level
+    // gets valid difficulty level, accepts e/m/h or easy/medium/hard
     private String getValidDifficulty() {
         String difficulty = scanner.nextLine().trim().toLowerCase();
-        while (!difficulty.equals("easy") && !difficulty.equals("medium") && !difficulty.equals("hard")) {
+        while (!difficulty.equals("easy") && !difficulty.equals("medium") && !difficulty.equals("hard") 
+                && !difficulty.equals("e") && !difficulty.equals("m") && !difficulty.equals("h")) {
             clearConsole();
-            System.out.println("Invalid input. Please choose 'easy', 'medium', or 'hard'.");
+            System.out.println("Invalid input. Please choose 'easy' (e), 'medium' (m), or 'hard' (h).");
             System.out.println();
             difficulty = scanner.nextLine().trim().toLowerCase();
         }
-        return difficulty;
+
+        // convert shorthand input to full form for consistency
+        switch (difficulty) {
+            case "e": return "easy";
+            case "m": return "medium";
+            case "h": return "hard";
+            default: return difficulty;
+        }
     }
 
     // gets valid number of AI opponents

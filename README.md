@@ -14,3 +14,9 @@
 
 ### 9/23
   - Added ASCII art in title screen - http://patorjk.com/software/taag/#p=display&h=0&v=0&f=Graffiti&t=Liars%20Dice
+
+### 9/23
+  - Redid opponent algo (more reasonable & difficult)
+  - Prevented opponents from invalid bidding
+  - Added shorthand user inputs
+  - Added quit option mid game
