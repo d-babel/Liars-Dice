@@ -20,3 +20,6 @@
   - Prevented opponents from invalid bidding
   - Added shorthand user inputs
   - Added quit option mid game
+
+------------ Submitted Dice Game, pt. I ------------
+
