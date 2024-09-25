@@ -13,7 +13,8 @@
   - Added checks for invalid user inputs and dice roll
 
 ### 9/23
-  - Added ASCII art in title screen - http://patorjk.com/software/taag/#p=display&h=0&v=0&f=Graffiti&t=Liars%20Dice
+  - Added ASCII art in title screen
+  http://patorjk.com/software/taag/#p=display&h=0&v=0&f=Graffiti&t=Liars%20Dice
 
 ### 9/23
   - Redid opponent algo (more reasonable & difficult)
@@ -21,5 +22,7 @@
   - Added shorthand user inputs
   - Added quit option mid game
 
------------- Submitted Dice Game, pt. I ------------
+# ------------ Submitted Dice Game, pt. I ------------
 
+### 9/24
+  - revised liars dice such that it fulfilled CS2 design principles (mainly 80 char limit & comments)
