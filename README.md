@@ -22,7 +22,7 @@
   - Added shorthand user inputs
   - Added quit option mid game
 
-# Submitted Dice Game, pt. I
+# Submitted Dice Game pt. I
 
 ### 9/24
   - revised liars dice such that it fulfilled CS2 design principles (mainly 80 char limit & comments)
